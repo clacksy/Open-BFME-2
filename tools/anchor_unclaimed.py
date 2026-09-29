@@ -180,9 +180,14 @@ def main():
 
     path = ROOT / args.out
     with path.open("w", newline="", encoding="utf-8") as handle:
+        # lineterminator is explicit: csv's default is CRLF, and this file is
+        # committed. Every reverse/*.csv in this repo is LF-terminated from
+        # birth, so a CRLF rewrite turns the whole file into a diff for every
+        # agent that regenerates it concurrently -- which is all of them.
         writer = csv.DictWriter(handle, fieldnames=list(rows[0].keys()) if rows else
                                 ["target_rva", "target_size", "zh_source", "alternates",
-                                 "confidence", "ghidra_name", "anchor"])
+                                 "confidence", "ghidra_name", "anchor"],
+                                lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
 

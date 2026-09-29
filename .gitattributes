@@ -16,3 +16,11 @@ reverse/functions.csv text eol=lf merge=union
 reverse/symbols.csv text eol=lf merge=union
 reverse/deleted_rows.csv text eol=lf merge=union
 reverse/re_attempts.log text eol=lf merge=union
+
+# Fully regenerated, not append-mostly, so no union driver: two concurrent
+# regenerations are two different snapshots and must be resolved by re-running
+# the tool, not by concatenating them. It still needs eol=lf, because csv's
+# default line terminator is CRLF and this is the one committed reverse/*.csv
+# written by a csv.DictWriter. Without the attribute a single regeneration on a
+# stale checkout rewrites all 37 lines and every peer rebases into a conflict.
+reverse/anchored_candidates.csv text eol=lf
