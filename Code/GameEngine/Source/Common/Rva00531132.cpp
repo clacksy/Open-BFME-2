@@ -1,8 +1,7 @@
-// ?rva00531132@Rva00531132@@QAEX_NH@Z
-// partial score=0.97 date=2026-09-29
-// ?rva00531132@Rva00531132@@QAEX_NH@Z
-// partial score=0.97 date=2026-09-29
 // cl: /O1 /MD
+// ?rva00531132@Rva00531132@@QAEX_NH@Z @ 0x00531132 (77B): __thiscall add/remove int in 12-entry set; caller at 0x005315A5.
+extern "C" void _ReadWriteBarrier(void);
+#pragma intrinsic(_ReadWriteBarrier)
 class Rva00531132
 {
 public:
@@ -25,6 +24,7 @@ void Rva00531132::rva00531132(bool add, int value)
 				break;
 			++index;
 			++p;
+			_ReadWriteBarrier();
 		} while (index < m_count);
 	}
 	if (add)
