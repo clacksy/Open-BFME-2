@@ -38,3 +38,20 @@ Rva00566695 &Rva00566695::operator=(const Rva00566695 &that)
 	m_map = that.m_map;
 	return *this;
 }
+
+// ?Rva0056693DCopy@@YAPAVRva00566695@@PAV1@00@Z @0x0056693D 50B.
+// Forward assign-copy loop stride 0x18 via rowed operator= at 0x00566695.
+// Evidence: chain lane; callee rowed; caller 0x00566AAD; unblocks 0x00566A9A.
+// Same 50B shape as rowed Rva004BA2E9Copy at 0x004BA2E9.
+Rva00566695 *Rva0056693DCopy(Rva00566695 *first, Rva00566695 *last, Rva00566695 *out)
+{
+	int n = last - first;
+	if (n <= 0)
+		return out;
+	for (int i = n; i != 0; --i) {
+		*out = *first;
+		++first;
+		++out;
+	}
+	return out;
+}
