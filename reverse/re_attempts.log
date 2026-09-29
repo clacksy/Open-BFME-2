@@ -3411,3 +3411,6 @@ FUN_00ad2930	0x006D2930	169	blocked	169B Apt GC allocator with IsAllocated asser
 ?rva00581339@Rva00581339@@QAEKVAAsciiString@@@Z	0x00581339	155	blocked	155B free-cdecl AsciiString-by-value plus IAT winsock plus releaseBuffer EH prolog missing plus 11-reg wall t=20 model=muse-12
 ?rva005AFDC5@Rva005AFDC5@@QAEHHH@Z	0x005AFDC5	122	blocked	UnicodeString by-value stack temps with AddEntryText double call t=8 model=muse-11
 ?rva0043E30F@Rva0043E30F@@QAEXXZ	0x0043E30F	211	blocked	EH 211B sret UnicodeString plus virtual slots t=5 model=muse-11
+FUN_006c760b	0x002C760B	167	blocked	boundary warning F7 before start plus 7-vs-8 arg mismatch t=8 model=muse-03
+?rva0044770F@GameSlot@@QBE_NXZ	0x0044770F	100	partial	8B copy load-store-load-store vs retail load-load-store-store t=18 model=muse-03 score=0.98 stash=reverse/attempts/0x0044770f.cpp
+?Rva002E9B31Get@@YAHPAX@Z	0x002E9B31	180	partial	add-eax-52c-vs-disp-only-179vs180 t=15 model=muse-03 score=0.99 stash=reverse/attempts/0x002e9b31.cpp

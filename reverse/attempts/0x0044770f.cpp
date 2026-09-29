@@ -2,6 +2,8 @@
 // partial score=0.98 date=2026-09-29
 // ?rva0044770F@GameSlot@@QBE_NXZ
 // partial score=0.98 date=2026-09-29
+// ?rva0044770F@GameSlot@@QBE_NXZ
+// partial score=0.98 date=2026-09-29
 // cl: /O1 /G7 /Oy- /DNDEBUG /MD
 //
 // ?rva0044770F@GameSlot@@QBE_NXZ, retail 0x0044770F, 100 bytes.
