@@ -1,7 +1,5 @@
 // ??1Rva0034C5E0@@UAE@XZ
 // partial score=0.94 date=2026-09-27
-// ??1Rva0034C5E0@@UAE@XZ
-// partial score=0.94 date=2026-09-27
 // cl: /DNDEBUG /DWIN32 /D_WINDOWS /MD /EHsc /O1 /Ob2
 // stlport
 // ??1Rva0034C5E0@@UAE@XZ @ 0x0035822E (88B).
@@ -20,9 +18,10 @@ public:
 	virtual void xfer();
 };
 
+extern const void *const g_00BBB554[];
 inline Snapshot::~Snapshot()
 {
-	*(const void **)this = reinterpret_cast<const void *>(0x00BBB554);
+	*(const void **)this = g_00BBB554;
 }
 
 class AsciiString
@@ -61,7 +60,6 @@ private:
 	RvaTree00357C6A *m_tree;
 };
 
-// ??1Rva0034C5E0@@UAE@XZ present-unmatched
 Rva0034C5E0::~Rva0034C5E0()
 {
 	RvaTree00357C6A *tree = m_tree;
@@ -69,6 +67,6 @@ Rva0034C5E0::~Rva0034C5E0()
 	{
 		tree->~RvaTree00357C6A();
 		::operator delete(tree);
-		m_tree = 0;
 	}
+	m_tree = 0;
 }
