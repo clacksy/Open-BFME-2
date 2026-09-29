@@ -42540,3 +42540,4 @@ __dup_0084EBC0,,0x00021D50,224,Code/Libraries/Source/WWVegas/WWLib/stlport_Local
 ??0Rva003F9FE6@@QAE@ABV0@@Z,,0x003F9FE6,225,Code/GameEngine/Source/GameLogic/Object/SpecialPower/Rva003F9FE6CopyCtor.cpp,matched,unlock copy ctor vtable 837898 with AsciiString vector scalars
 ?rva003F02E4@Rva003F02E4@@QAE_NXZ,,0x003F02E4,82,Code/GameEngine/Source/Common/Rva003F02E4.cpp,matched,unlock predicate 13C flag list byte get
 ??1Rva00151632@@UAE@XZ,,0x00151632,90,Code/GameEngine/Source/Common/Rva00151632Dtor.cpp,matched,unlock twin of Rva0017FB94 via virtual get plus delete
+??1DisplayString@@UAE@XZ,,0x00358994,57,Code/GameEngine/Source/Common/DisplayStringDtor.cpp,matched,DisplayString dtor via reset plus member release donor DisplayString.cpp caller 0x001061AC
