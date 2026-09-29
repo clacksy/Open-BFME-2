@@ -13,6 +13,24 @@ public:
 	unsigned char get() const;
 };
 
+class Rva002E071E
+{
+public:
+	bool rva002E071E(const Rva002E071E *other) const;
+};
+
+class Rva002E2903Player : public Rva002E071E
+{
+};
+
+class Rva002BA8F1Logic
+{
+public:
+	Rva002E2903Player *find(int id, unsigned int *index);
+};
+
+extern Rva002BA8F1Logic *g_009FEF10;
+
 struct Rva003F02E4Node
 {
 	char m_pad[0x20];
@@ -25,6 +43,7 @@ class Rva003F02E4
 {
 public:
 	bool rva003F02E4();
+	bool rva003F0336(const Rva002E071E *other);
 private:
 	unsigned char m_pad[0x11C];
 	bool m_11C;
@@ -52,5 +71,19 @@ bool Rva003F02E4::rva003F02E4()
 		if (h->get() != 0)
 			return true;
 	}
+	return false;
+}
+
+// ?rva003F0336@Rva003F02E4@@QAE_NPBVRva002E071E@@@Z, retail 0x003F0336, 56 bytes.
+// Chain lane: calls rowed 0x003F02E4 just landed; find 0x002B51F8 via g_009FEF10
+// with m_13C and null index, then rowed rva002E071E 0x002E071E compare.
+// Evidence: callers 0x0020FF46 0x0020FFDA in 0x0020FDDF; prev 0x003F02E4 same TU flags.
+bool Rva003F02E4::rva003F0336(const Rva002E071E *other)
+{
+	Rva002E2903Player *p = g_009FEF10->find(m_13C, 0);
+	if (p == 0)
+		return false;
+	if (!p->rva002E071E(other))
+		return rva003F02E4();
 	return false;
 }
