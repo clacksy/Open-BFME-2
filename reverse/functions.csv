@@ -42538,3 +42538,4 @@ __dup_0084EBC0,,0x00021D50,224,Code/Libraries/Source/WWVegas/WWLib/stlport_Local
 ??_GRva003FAFB9@@UAEPAXI@Z,,0x003FB4EC,28,Code/GameEngine/Source/Common/FamilyDeletingDtors_Rva003FAFB9.cpp,matched,chain deleting dtor calls rowed FAFB9 then delete
 ??0Rva0055A246@@QAE@ABV0@@Z,,0x0055A3C5,71,Code/GameEngine/Source/Common/Rva0055A246Ctor.cpp,matched,copy ctor plus array-new plus 4x3 movsd plus callers
 ??0Rva003F9FE6@@QAE@ABV0@@Z,,0x003F9FE6,225,Code/GameEngine/Source/GameLogic/Object/SpecialPower/Rva003F9FE6CopyCtor.cpp,matched,unlock copy ctor vtable 837898 with AsciiString vector scalars
+?rva003F02E4@Rva003F02E4@@QAE_NXZ,,0x003F02E4,82,Code/GameEngine/Source/Common/Rva003F02E4.cpp,matched,unlock predicate 13C flag list byte get
