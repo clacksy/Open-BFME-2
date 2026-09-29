@@ -20,12 +20,20 @@ public:
 	void rva00531300();
 	void rva00531431(int a, int b);
 	unsigned char rva00531512(int a, int b);
+	void rva00531342(struct Rva005312BERect *r);
 	char m_pad[0x1BA30];
 	unsigned char m_flag1BA30;
 	char m_pad2[0x1BA38 - 0x1BA30 - 1];
 	Rva005312BEItem **m_ppItems;
 	int m_outer;
 	int m_inner;
+};
+struct Rva005312BERect
+{
+	int x0;
+	int y0;
+	int x1;
+	int y1;
 };
 void Rva005312BE::rva005312BE()
 {
@@ -63,4 +71,30 @@ void Rva005312BE::rva00531431(int a, int b)
 	if (i >= m_outer || j >= m_inner)
 		return;
 	m_ppItems[i][j].m_35 = 1;
+}
+
+void Rva005312BE::rva00531342(Rva005312BERect *r)
+{
+	if (r->x1 < r->x0)
+		return;
+	if (r->y1 < r->y0)
+		return;
+	if (r->x1 < 0 || r->y1 < 0)
+		return;
+	if (r->x0 >= m_outer * 16 || r->y0 >= m_inner * 16)
+		return;
+	m_flag1BA30 = 1;
+	int x0 = r->x0 < 0 ? 0 : r->x0 / 16;
+	int y0 = r->y0 < 0 ? 0 : r->y0 / 16;
+	int x1 = r->x1 / 16;
+	int y1 = r->y1 / 16;
+	if (x1 >= m_outer)
+		x1 = m_outer - 1;
+	if (y1 >= m_inner)
+		y1 = m_inner - 1;
+	for (int i = x0; i <= x1; ++i)
+	{
+		for (int j = y0; j <= y1; ++j)
+			m_ppItems[i][j].m_35 = 1;
+	}
 }
