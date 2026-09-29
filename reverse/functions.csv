@@ -42550,3 +42550,4 @@ __dup_0084EBC0,,0x00021D50,224,Code/Libraries/Source/WWVegas/WWLib/stlport_Local
 ??0Rva00402C0F@@QAE@ABV0@@Z,,0x00402C0F,63,Code/GameEngine/Source/GameLogic/Object/SpecialPower/Rva003F9FE6CopyCtor.cpp,matched,chain lane base 0x003F9FE6 vtable 0x00837898 extras
 ?rva0070B220@AptNativeHash@@QAEXPAX@Z,,0x0070B220,145,Code/Libraries/Source/Apt/AptNativeHashMark.cpp,matched,AptNativeHash GC mark via forwarder 0x006DCC00 and callers
 ?rva003F0336@Rva003F02E4@@QAE_NPBVRva002E071E@@@Z,,0x003F0336,56,Code/GameEngine/Source/Common/Rva003F02E4.cpp,matched,chain predicate via global find plus rowed compare to 003F02E4
+??0Rva00151632@@QAE@PBD@Z,,0x001515CA,98,Code/GameEngine/Source/Common/Rva00151632Ctor.cpp,matched,vtable 0x007D3A6C plus rowed dtor twin plus GenBase base plus fxShader format
