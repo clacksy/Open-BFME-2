@@ -123,3 +123,32 @@ Rva003FA118::Rva003FA118(const Rva003FA118 &src)
 	m_5D = src.m_5D;
 	m_5E = src.m_5E;
 }
+
+// ??0Rva00402C0F@@QAE@ABV0@@Z @0x00402C0F 63B
+// Copy ctor of a Rva003F9FE6 sibling storing vtable 0x00837898 then copying
+// int at +0x58 and +0x5C plus 4 bytes +0x60..+0x63.
+// Evidence: chain lane, callee 0x003F9FE6 rowed, caller 0x00402D4B.
+class Rva00402C0F : public Rva003F9FE6
+{
+public:
+	virtual void v00() = 0;
+	Rva00402C0F(const Rva00402C0F &src);
+private:
+	int m_58;
+	int m_5C;
+	unsigned char m_60;
+	unsigned char m_61;
+	unsigned char m_62;
+	unsigned char m_63;
+};
+
+Rva00402C0F::Rva00402C0F(const Rva00402C0F &src)
+	: Rva003F9FE6(src)
+{
+	m_58 = src.m_58;
+	m_5C = src.m_5C;
+	m_60 = src.m_60;
+	m_61 = src.m_61;
+	m_62 = src.m_62;
+	m_63 = src.m_63;
+}

@@ -42547,3 +42547,4 @@ __dup_0084EBC0,,0x00021D50,224,Code/Libraries/Source/WWVegas/WWLib/stlport_Local
 ?Rva0056693DCopy@@YAPAVRva00566695@@PAV1@00@Z,,0x0056693D,50,Code/GameEngine/Source/Common/Rva00566695Assign.cpp,matched,chain lane copy loop via rowed assign
 ??_GDisplayString@@UAEPAXI@Z,,0x003589CD,28,Code/GameEngine/Source/Common/DisplayStringDtor.cpp,matched,scalar deleting dtor calls rowed dtor 0x00358994 then delete 0x0002FD60 slot 0 vtable 0x00815338
 ?rva00531132@Rva00531132@@QAEX_NH@Z,,0x00531132,77,Code/GameEngine/Source/Common/Rva00531132.cpp,matched,caller 0x005315A5 FINISH barrier reloads count in loop
+??0Rva00402C0F@@QAE@ABV0@@Z,,0x00402C0F,63,Code/GameEngine/Source/GameLogic/Object/SpecialPower/Rva003F9FE6CopyCtor.cpp,matched,chain lane base 0x003F9FE6 vtable 0x00837898 extras
