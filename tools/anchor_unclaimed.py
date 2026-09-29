@@ -21,9 +21,20 @@ The 1,129 are not served here. They carry a real lead -- a distinctive string, a
 boundary, resolved callees -- but naming them means synthesising an identity
 rather than recovering one, which is a different job with a different review bar.
 
+`zh_source` is a path relative to the Zero Hour tree. It is deliberately not a
+basename: 5,491 reference files share only 2,735 basenames, so a basename cannot
+say where a literal lives and two unrelated files of the same name would read as
+one source and score "high". See zh_literal_index.
+
+A row here is a lead, never an identity: the anchor proves only that some
+unclaimed function references a literal the reference also contains. Confirm the
+named function against the disassembly before spending its name.
+
 Scanning 5,512 reference files takes far longer than next_work.py's ten-second
 budget, so the result is cached in reverse/anchored_candidates.csv the way
-drift_report.csv is. Regenerate after a batch of landings.
+drift_report.csv is. Regenerate after a batch of landings -- the cached file is a
+snapshot of what was unclaimed when it was written, so addresses landed since
+then stay in it until the next run.
 
 Usage:
   python3 tools/anchor_unclaimed.py [--min-size 32] [--out reverse/anchored_candidates.csv]
@@ -103,7 +114,14 @@ def unique_anchors(unclaimed):
 
 
 def zh_literal_index():
-    """{literal: {source basenames containing it}} over the reference tree."""
+    """{literal: {source paths relative to ZH}} over the reference tree.
+
+    Keyed by path, not basename. The tree holds 5,491 files under 2,735 distinct
+    basenames -- registry.cpp appears 8 times, StdAfx.cpp 12 -- so a basename key
+    collapses files that are different sources, and `len(sources) == 1` then
+    reports "high confidence, exactly one ZH source" for a literal that several
+    unrelated files carry. A path key makes that ambiguity count for what it is.
+    """
     if not ZH.is_dir():
         raise SystemExit(f"{ZH.relative_to(ROOT)} is missing — the reference tree is required")
     index = collections.defaultdict(set)
@@ -111,12 +129,13 @@ def zh_literal_index():
         for name in files:
             if not name.endswith((".cpp", ".c", ".h")):
                 continue
+            path = Path(base, name)
             try:
-                text = Path(base, name).read_text(encoding="utf-8", errors="replace")
+                text = path.read_text(encoding="utf-8", errors="replace")
             except OSError:
                 continue
             for match in QUOTED.finditer(text):
-                index[match.group(1)].add(name)
+                index[match.group(1)].add(path.relative_to(ZH).as_posix())
     return index
 
 
