@@ -102,3 +102,24 @@ Rva003F9FE6::Rva003F9FE6(const Rva003F9FE6 &src)
 	m_55 = src.m_55;
 	m_56 = src.m_56;
 }
+
+class Rva003FA118 : public Rva003F9FE6
+{
+public:
+	virtual void v00() = 0;
+	Rva003FA118(const Rva003FA118 &src);
+private:
+	int m_58;
+	unsigned char m_5C;
+	unsigned char m_5D;
+	unsigned char m_5E;
+};
+
+Rva003FA118::Rva003FA118(const Rva003FA118 &src)
+	: Rva003F9FE6(src)
+{
+	m_58 = src.m_58;
+	m_5C = src.m_5C;
+	m_5D = src.m_5D;
+	m_5E = src.m_5E;
+}

@@ -42543,3 +42543,4 @@ __dup_0084EBC0,,0x00021D50,224,Code/Libraries/Source/WWVegas/WWLib/stlport_Local
 ??1DisplayString@@UAE@XZ,,0x00358994,57,Code/GameEngine/Source/Common/DisplayStringDtor.cpp,matched,DisplayString dtor via reset plus member release donor DisplayString.cpp caller 0x001061AC
 ?rva00531342@Rva005312BE@@QAEXPAURva005312BERect@@@Z,,0x00531342,239,Code/GameEngine/Source/Common/Rva005312BEClear.cpp,matched,rect fill 0x35 via Rva005312BE
 ??_GRva00151632@@UAEPAXI@Z,,0x00151717,28,Code/GameEngine/Source/Common/FamilyDeletingDtors_Rva00151632.cpp,matched,chain deleting dtor for 0x00151632
+??0Rva003FA118@@QAE@ABV0@@Z,,0x003FA118,51,Code/GameEngine/Source/GameLogic/Object/SpecialPower/Rva003F9FE6CopyCtor.cpp,matched,chain derived copy via base 3F9FE6 vtable 83789C
