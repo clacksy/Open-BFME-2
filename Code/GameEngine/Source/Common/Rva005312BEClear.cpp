@@ -5,10 +5,17 @@
 // ?rva00531512@Rva005312BE@@QAEEHH@Z @ 0x00531512 (76B): bounded getter returns entry flag or 0.
 // Offsets 0x1BA38/0x1BA3C/0x1BA40 shared with Rva005315B0IntPairField in Disp32IntPairFieldGetters.cpp.
 // Callers at 0x002F960C 0x002FA743 0x002FB050 0x002FCA6F 0x002FD573. Owner unknown so honest address name.
+class Rva00531132
+{
+public:
+	void rva00531132(bool add, int value);
+	int m_count;
+	int m_items[12];
+};
 class Rva005312BEItem
 {
 public:
-	char m_pad0[0x34];
+	Rva00531132 m_set;
 	unsigned char m_cleared;
 	unsigned char m_35;
 	char m_pad1[0x44 - 0x34 - 2];
@@ -21,6 +28,7 @@ public:
 	void rva00531431(int a, int b);
 	unsigned char rva00531512(int a, int b);
 	void rva00531342(struct Rva005312BERect *r);
+	void rva0053155E(int a, int b, bool add, int value);
 	char m_pad[0x1BA30];
 	unsigned char m_flag1BA30;
 	char m_pad2[0x1BA38 - 0x1BA30 - 1];
@@ -97,4 +105,15 @@ void Rva005312BE::rva00531342(Rva005312BERect *r)
 		for (int j = y0; j <= y1; ++j)
 			m_ppItems[i][j].m_35 = 1;
 	}
+}
+// ?rva0053155E@Rva005312BE@@QAEXHH_NH@Z @ 0x0053155E (82B): bounded forward to Rva00531132 set; callers at 0x002E9033 0x002E9090.
+void Rva005312BE::rva0053155E(int a, int b, bool add, int value)
+{
+	if (a < 0 || b < 0)
+		return;
+	int i = a / 16;
+	int j = b / 16;
+	if (i >= m_outer || j >= m_inner)
+		return;
+	m_ppItems[i][j].m_set.rva00531132(add, value);
 }
