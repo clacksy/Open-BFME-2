@@ -43400,3 +43400,4 @@ _piChannelMessageA,,0x006AACB0,305,Code/GameEngine/Source/GameNetwork/GameSpy/pe
 ??0Rva00171024@@QAE@HH@Z,,0x00171024,67,Code/Libraries/Source/WWVegas/WWLib/Rva00171024Ctor.cpp,matched,unlock ctor clamp 0x800 via rowed map 0x00242F01
 ?rva0025DDA4@Rva0025DDD2@@QBEMXZ,,0x0025DDA4,46,Code/GameEngine/Source/Common/Rva0025DDD2Float.cpp,matched,float wrapper over Transport average via 0C 12024 sibling of 0x0025DDD2
 ?rva0025DE00@Rva0025DDD2@@QBEMXZ,,0x0025DE00,46,Code/GameEngine/Source/Common/Rva0025DDD2Float.cpp,matched,float wrapper over Transport average via 0C 12024 sibling of 0x0025DDD2
+?dup_002833e7@@YIXPAURva002833E7Holder@@@Z,,0x002833E7,26,Code/GameEngine/Source/Common/Rva002833E7.cpp,matched,owned-pointer reset: member read then cleared before the guard; delete p lowers to the rowed ??3@YAXPAX@Z. Identity not recovered; packet lead was one of 55 equal ties and is not a list insert
