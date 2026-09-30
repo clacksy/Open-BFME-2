@@ -459,6 +459,28 @@ def ghidra_validator():
     return boundary_validator.BoundaryValidator(build.read_target_bytes, sizes)
 
 
+# Ghidra names its SEH residue `Unwind@<va>` / `Catch@<va>`. Those records are
+# not function bodies and no C++ reproduces them; tools/gen_uw.py owns that lane
+# and tools/gen_small.py carries the same prefixes. The packet queue is for
+# bodies a seat can port, so it must not draw from them.
+FUNCLET_PREFIXES = ("Unwind@", "Catch@")
+
+_GHIDRA_NAMES = None
+
+
+def ghidra_names():
+    """{rva: ghidra name} over the committed inventory, read once."""
+    global _GHIDRA_NAMES
+    if _GHIDRA_NAMES is None:
+        if not build.GHIDRA_FUNCTIONS.exists():
+            raise SystemExit(f"zh_sweep: {build.GHIDRA_FUNCTIONS.relative_to(ROOT)} is missing; "
+                             "without it no packet can be told from a funclet")
+        with build.GHIDRA_FUNCTIONS.open(newline="") as handle:
+            _GHIDRA_NAMES = {int(row["rva"], 16): row["name"]
+                             for row in csv.DictReader(handle)}
+    return _GHIDRA_NAMES
+
+
 def retail_extent(rva, validator, text, text_rva):
     """(bytes, kind, where it came from) for the body at `rva`, or (None, ...).
 
@@ -540,9 +562,17 @@ def do_packets(args):
     # objdump was enough -- left the queue empty with nothing to fall back on,
     # and the leads people had hand-annotated into those files went with it.
     rendered = {}
-    covered = solved = bodies = inflated = 0
+    covered = solved = bodies = inflated = funclets = 0
+    names = ghidra_names()
     verdicts, extents, conflicts = Counter(), Counter(), 0
     for rva, group in sorted(by_rva.items()):
+        # Skipped on the packet's own address, which is the corrected start, so
+        # a refuted address cannot smuggle a funclet in through its correction.
+        # Measured 2026-09-30: without this, 9 of 15 served packets were
+        # Unwind@ records -- 60% of the queue was work no seat could land.
+        if names.get(rva, "").startswith(FUNCLET_PREFIXES):
+            funclets += 1
+            continue
         # Ranked on what the packet prints, which is agreement over the bytes
         # actually compared. Ranking on match.json's `align` puts a candidate
         # that is two thirds relocation slots above one with none.
@@ -584,6 +614,8 @@ def do_packets(args):
     print(f"packets: {len(rendered)} written to {PACKET_DIR.relative_to(ROOT)}, covering "
           f"{bodies} candidate body/bodies over {covered:,} bytes of unclaimed .text")
     print(f"  {solved} address(es) the ledger has claimed since the match ran: no packet")
+    print(f"  {funclets} address(es) skipped as Unwind@/Catch@ funclets: compiler machinery "
+          f"with no C++ body to port (tools/gen_uw.py owns that lane)")
     for verdict, count in sorted(verdicts.items()):
         print(f"  address {verdict:24s} {count:4d}")
     for source, count in sorted(extents.items()):
