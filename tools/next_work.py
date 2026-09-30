@@ -36,6 +36,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import boundary_validator
 import claims
+import landability
 import re_log
 import yield_model
 
@@ -46,6 +47,8 @@ ROOT = Path(__file__).resolve().parents[1]
 # below spends them.
 DRIFT = ROOT / "reverse" / "zh_sweep" / "drift_report.csv"
 PACKETS = ROOT / "reverse" / "zh_sweep" / "packets"
+# The fenced block zh_sweep.py writes for each REL32 site, one line per callee.
+PACKET_PINS = re.compile(r"## Callee pins[^\n]*\n+```\n(.*?)```", re.S)
 GHIDRA_FUNCTIONS = ROOT / "reverse" / "ghidra_functions.csv"
 STRING_XREFS = ROOT / "reverse" / "string_xrefs.tsv"
 ANCHORED = ROOT / "reverse" / "anchored_candidates.csv"
@@ -635,6 +638,25 @@ def structural_validator():
                                                 _ghidra_sizes())
 
 
+_SYMBOL_MAP = None
+
+
+def callee_resolves(symbol, address):
+    """Would the byte gate resolve THIS name at THIS address?
+
+    Asked of the symbol the candidate's reloc references, not of the address on
+    its own: retail folds and duplicates bodies, so an address some other name
+    covers is no evidence that this call site encodes where the ledger says.
+    Live rather than the packet's generation-time mark, so a pin that landed
+    after `zh_sweep.py packets` last ran cannot leave the body looking blocked.
+    """
+    global _SYMBOL_MAP
+    if _SYMBOL_MAP is None:
+        import build
+        _SYMBOL_MAP = build.load_symbol_map()
+    return address in _SYMBOL_MAP.get(symbol, ())
+
+
 def collapse_and_validate(candidates, validator=None):
     """Serve one item per address, and only where the address is a boundary.
 
@@ -905,9 +927,16 @@ def packet_candidates(claimed):
     already aligns with the retail bytes -- the strongest start any tier here
     offers. They sit at addresses no other tier reaches, so without this they
     are served by nothing: 148 of the first 150 written were never worked.
+
+    Each is also scored on the deficits that actually predicted failure --
+    boundary, callee provenance, compiler shape -- because package alignment
+    does not: 0x00203E47 aligned at 92% and burned three seats. The score is
+    carried so tools/landability.band can serve the best band first, and so the
+    selection JSON says what a draw was worth.
     """
     if not PACKETS.is_dir():
         return []
+    validator = structural_validator()
     out = []
     for path in sorted(PACKETS.glob("*.md")):
         try:
@@ -920,15 +949,22 @@ def packet_candidates(claimed):
         size = re.search(r"- (\d+) bytes", text)
         aligned = re.search(r"agrees on ([\d.]+)%", text)
         lead = re.search(r"- `([^`]+)`\n\s+in `([^`]+)`", text)
+        pins = PACKET_PINS.search(text)
+        function = lead.group(1) if lead else "(see packet)"
+        served = int(size.group(1)) if size else 0
+        start_ok, start_why = validator.check_start(rva)
         out.append({
             "target_rva": f"0x{rva:08X}",
-            "size": int(size.group(1)) if size else 0,
+            "size": served,
             "aligned_pct": aligned.group(1) if aligned else "?",
-            "function": lead.group(1) if lead else "(see packet)",
+            "function": function,
             "source": lead.group(2) if lead else str(path.relative_to(ROOT)),
             "packet": str(path.relative_to(ROOT)),
+            "landability": landability.verdict(
+                function, served, start_ok, start_why, pins.group(1) if pins else "",
+                resolves=callee_resolves),
         })
-    out.sort(key=lambda c: -c["size"])
+    out.sort(key=lambda c: (c["landability"]["rank"], -c["size"]))
     return out
 
 
@@ -1000,6 +1036,8 @@ def print_candidate(label, candidate, meta, candidates=()):
         print(f"       {candidate['target_rva']} — Zero Hour's own body for this "
               f"address already agrees on {candidate['aligned_pct']}% of the "
               f"non-relocation bytes")
+        if candidate.get("landability"):
+            print(f"       landability: {landability.line(candidate['landability'])}")
         _print_stash(candidate)
         _print_boundary_verdicts(candidate)
         print(f"       start: read {candidate['packet']}, port {candidate['source']}")
@@ -1257,12 +1295,17 @@ def main():
     if not args.include_logged:
         packets, dropped_packets = drop_logged(packets)
         suppressed += dropped_packets
+    # The packet tier is the only one scored on landing evidence, so one band is
+    # served at a time: a queue offering a `landable` body must not spend a seat
+    # on an `unproven-boundary` one. See tools/landability.py.
+    packets, set_aside = landability.band(packets)
     label, candidates = selected_queue(args.tier, drifts, structural, ghidra_absent,
                                        anchored, named, packets)
     candidate, acquired = (claim_choice(candidates, label) if args.claim else
                            (weighted_choice(candidates) if candidates else None, []))
     deferred = sum(1 for c in candidates if c.get("deferred_attempts"))
     meta = {"pool": len(candidates), "suppressed_logged": suppressed,
+            "packets_set_aside": set_aside,
             "deferred_pool": deferred, "shard": shard_meta}
     if args.json:
         meta = dict(meta, cluster=[
@@ -1277,6 +1320,9 @@ def main():
     if suppressed:
         print(f"re_attempts: {suppressed} candidate(s) hidden as already "
               f"investigated (--include-logged to show)")
+    if set_aside:
+        print(f"landability: {set_aside} packet(s) set aside — serving the "
+              f"best-evidenced band first")
     note = deferred_note(candidates)
     if note:
         print(note)

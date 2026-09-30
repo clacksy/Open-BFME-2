@@ -221,10 +221,18 @@ CALLEE = "?callee@Thing@@QAEXXZ"
 CALLEE_ROW = f"{CALLEE},,0x00002000,32,{SOURCE},matched,"
 
 
-def calls(target, site=0x3004):
-    """A REL32 site at `site` whose retail displacement decodes to `target`."""
-    return {"relocs": [(site - 0x3000, zh_sweep.REL32, CALLEE)],
-            "patches": [(site, struct.pack("<i", target - (site + 4)))]}
+def calls(target, site=0x3004, base=0x3000):
+    """A REL32 `call` at `site - 1`, its displacement at `site`, in `base` coords.
+
+    The opcode is written, not just the displacement, because zh_sweep refuses to
+    derive a pin from a reloc that does not land on a real call or jump in
+    retail -- the guard that stops the candidate's offsets being read against a
+    body the sweep moved under them. `base` is where the candidate was placed,
+    which is not always where the packet is addressed: `calls(..., base=0x3004)`
+    is a candidate the sweep aligned four bytes into the 0x3000 body.
+    """
+    return {"relocs": [(site - base, zh_sweep.REL32, CALLEE)],
+            "patches": [(site - 1, b"\xe8" + struct.pack("<i", target - (site + 4)))]}
 
 
 def pins_of(packet):
@@ -262,3 +270,48 @@ def test_a_pin_only_symbols_csv_holds_names_symbols_csv_and_not_the_ledger(
 
     assert pins_of(written[0x3000]) == (f"{CALLEE},0x00002400 "
                                         "(already pinned in reverse/symbols.csv)")
+
+
+def test_a_pin_is_read_where_the_candidate_was_placed_not_where_the_packet_is(
+        tmp_path, monkeypatch):
+    """0x005E16DA's bug, reproduced: the sweep aligned the candidate four bytes
+    into the body and do_packets corrected the packet back to the inventory's
+    start, but the reloc offsets stayed relative to the placement. Reading them
+    against the corrected start put the call two bytes early and printed the pin
+    as `0x-16B05E16`, an address no converter can use. Here the candidate is
+    placed at 0x3004 (corrected to 0x3000) and its REL32 reloc is at candidate
+    +0x4, which is retail 0x3008 -- the address that decodes to 0x2000."""
+    written = run_packets(tmp_path, monkeypatch, [near(0x3004, 16)],
+                          ledger_rows=[CALLEE_ROW],
+                          **calls(0x2000, site=0x3008, base=0x3004))
+
+    assert list(written) == [0x3000], written
+    assert pins_of(written[0x3000]) == f"{CALLEE},0x00002000 (already in the ledger)"
+
+
+def test_a_reloc_that_lands_off_a_real_call_is_refused_not_guessed(
+        tmp_path, monkeypatch):
+    """When the candidate's layout differs there, the sweep must say so rather
+    than read a displacement out of whatever operand is there. The old code
+    printed a fabricated (and sometimes negative) address for such a site, and
+    the byte gate would then be passed with a pin naming the wrong function."""
+    written = run_packets(tmp_path, monkeypatch, [near(0x3000, 16)],
+                          ledger_rows=[CALLEE_ROW], relocs=[(4, zh_sweep.REL32, CALLEE)])
+
+    pin = pins_of(written[0x3000])
+    assert pin.startswith(f"{CALLEE} (retail carries no call or jump opcode")
+    assert ",0x" not in pin, pin
+
+
+def test_sites_outside_the_served_body_are_one_summary_not_one_pin_each(
+        tmp_path, monkeypatch):
+    """0x0075B948's shape: a 59-byte candidate aligned by its reloc-free runs
+    against a 4-byte retail extent, so all five of its REL32 sites fall outside.
+    Repeating the refusal per site read as five pins to add."""
+    written = run_packets(tmp_path, monkeypatch, [near(0x3000, 16)],
+                          relocs=[(40, zh_sweep.REL32, CALLEE),
+                                  (44, zh_sweep.REL32, CALLEE)])
+
+    pin = pins_of(written[0x3000])
+    assert pin.startswith("(2 REL32 site(s) of the candidate lie outside the 16B")
+    assert ",0x" not in pin, pin

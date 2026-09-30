@@ -707,7 +707,7 @@ def elsewhere(callee):
     return f" (unpinned: this is the address retail calls; {'; '.join(known)})" if known else ""
 
 
-def callee_pins(rva, body, relocs, sources):
+def callee_pins(rva, placed_at, body, relocs, sources):
     """Each REL32 callee with the address THIS call site encodes in retail.
 
     The displacement is read out of the retail bytes, so the address is the
@@ -717,13 +717,34 @@ def callee_pins(rva, body, relocs, sources):
     called HERE at a copy the ledger does not hold, and a pin that reads the
     name alone asserts a symbol is landed while quoting an address no row
     covers.
+
+    `placed_at` is where the sweep's alignment placed the candidate, which is
+    NOT always `rva`: do_packets corrects a near placement back to the
+    inventory's function start, and the candidate's reloc offsets stay relative
+    to the placement it aligned at. Reading them against the corrected start put
+    0x005E16DA's only call four bytes early -- retail inserts `push [esp+8]`
+    after the corrected start -- and printed the pin as `0x-16B05E16`, an
+    address no converter can use. Offsets are rebased by the correction, and a
+    site is refused rather than guessed when retail does not carry a call or
+    jump opcode where the reloc says one is.
     """
+    shift = placed_at - rva
     lines = []
+    outside = 0
     for offset, kind, callee in relocs:
-        if kind != REL32 or offset + 4 > len(body):
+        if kind != REL32:
             continue
-        displacement = struct.unpack_from("<i", body, offset)[0]
-        target = rva + offset + 4 + displacement
+        index = offset + shift
+        if index < 1 or index + 4 > len(body):
+            outside += 1
+            continue
+        if body[index - 1] not in (0xE8, 0xE9):
+            lines.append(f"{callee} (retail carries no call or jump opcode at the "
+                         f"rebased site +0x{index:x}; the layouts differ, so no address "
+                         "is derived here)")
+            continue
+        displacement = struct.unpack_from("<i", body, index)[0]
+        target = rva + index + 4 + displacement
         symbol = sources.get(callee)
         if symbol is None:
             mark = ""
@@ -734,6 +755,14 @@ def callee_pins(rva, body, relocs, sources):
         else:
             mark = elsewhere(symbol)
         lines.append(f"{callee},0x{target:08X}{mark}")
+    if outside:
+        # One line, not one per site: for a candidate the sweep could only align
+        # by its reloc-free runs, every site can fall outside the served body,
+        # and 0x0075B948's 59B candidate did exactly that against a 4B retail
+        # extent. Repeating it per site read as five pins to add.
+        lines.insert(0, f"({outside} REL32 site(s) of the candidate lie outside the "
+                        f"{len(body)}B retail body once the placement is rebased; the "
+                        "layouts differ, so no pin is derived here)")
     return "\n".join(lines) or "(no relative calls in this body)"
 
 
@@ -877,7 +906,7 @@ def packet_text(rva, bounds, group, body, relocs, sources):
         "## Callee pins (paste unresolved ones into reverse/symbols.csv)",
         "",
         "```",
-        callee_pins(rva, body, relocs, sources),
+        callee_pins(rva, group[0].get("rva", rva), body, relocs, sources),
         "```",
         "",
         "## Landing it",
