@@ -1299,13 +1299,20 @@ def main():
     # served at a time: a queue offering a `landable` body must not spend a seat
     # on an `unproven-boundary` one. See tools/landability.py.
     packets, set_aside = landability.band(packets)
+    # ...and a band the inventory cannot place must not preempt the tiers that do
+    # validate their addresses, or scoring the packets would make the default
+    # pick worse than it was unscored. `--tier packet` still serves it.
+    withheld = 0
+    if args.tier is None and not landability.preempts(packets):
+        withheld = len(packets)
+        packets = []
     label, candidates = selected_queue(args.tier, drifts, structural, ghidra_absent,
                                        anchored, named, packets)
     candidate, acquired = (claim_choice(candidates, label) if args.claim else
                            (weighted_choice(candidates) if candidates else None, []))
     deferred = sum(1 for c in candidates if c.get("deferred_attempts"))
     meta = {"pool": len(candidates), "suppressed_logged": suppressed,
-            "packets_set_aside": set_aside,
+            "packets_set_aside": set_aside, "packets_withheld": withheld,
             "deferred_pool": deferred, "shard": shard_meta}
     if args.json:
         meta = dict(meta, cluster=[
@@ -1323,6 +1330,9 @@ def main():
     if set_aside:
         print(f"landability: {set_aside} packet(s) set aside — serving the "
               f"best-evidenced band first")
+    if withheld:
+        print(f"landability: {withheld} packet(s) withheld from the default pick — "
+              f"the inventory places none of them; use --tier packet to work one")
     note = deferred_note(candidates)
     if note:
         print(note)

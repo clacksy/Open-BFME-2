@@ -116,3 +116,20 @@ def test_band_leaves_unscored_candidates_alone():
     plain = [{"function": "a"}, {"function": "b"}]
     kept, set_aside = landability.band(plain)
     assert kept == plain and set_aside == 0
+
+
+def test_only_a_boundary_proven_packet_preempts_the_other_tiers():
+    """Once 0x005E16DA landed, the packet queue's best remaining band is
+    0x00203E47 at unproven-boundary. Drawing that by default would put it ahead
+    of the named/structural/ghidra tiers, whose addresses are at least
+    validated, so the scored default pick would be worse than the unscored one.
+    An explicit --tier packet still serves it."""
+    def band_of(rank):
+        return [{"function": "x", "landability": {"rank": rank}}]
+
+    assert landability.preempts(band_of(landability.LANDABLE))
+    assert landability.preempts(band_of(landability.NEEDS_ONE_PIN))
+    assert landability.preempts(band_of(landability.NEEDS_PINS))
+    assert not landability.preempts(band_of(landability.UNPROVEN_BOUNDARY))
+    assert not landability.preempts(band_of(landability.SUSPECT_SHAPE))
+    assert not landability.preempts([])

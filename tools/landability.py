@@ -184,3 +184,16 @@ def band(candidates):
     kept = [c for c in candidates if not c.get("landability")
             or c["landability"]["rank"] == best]
     return kept, len(candidates) - len(kept)
+
+
+def preempts(kept_band):
+    """Should this band displace a lower-priority tier in the default pick?
+
+    Only when its boundary is proven. An unproven boundary is exactly the
+    deficit that burned three seats on 0x00203E47, and the other tiers at least
+    validate their addresses against the inventory, so a packet the inventory
+    cannot place must never be drawn ahead of them -- it would make the default
+    pick worse than it was before any of this was scored. An explicit
+    `--tier packet` still serves it, deliberately.
+    """
+    return bool(kept_band) and kept_band[0]["landability"]["rank"] < UNPROVEN_BOUNDARY
