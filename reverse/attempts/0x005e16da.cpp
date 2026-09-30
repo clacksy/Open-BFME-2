@@ -75,3 +75,14 @@ Rva005E16DA::Rva005E16DA(int arg)
 	: Rva00221635Base(arg), m_8(0), m_c(0), m_10(0)
 {
 }
+//
+// NEXT LEVER TO TRY (not yet attempted, one hypothesis): the vptr store lands
+// last because the class is POLYMORPHIC and MSVC defers the vptr set. Model the
+// +0 store as an ordinary first member instead -- a non-polymorphic class whose
+// m_0 is a pointer initialised to a global that is pinned at 0x00C77A30 -- and
+// MSVC emits member initialisers in DECLARATION ORDER, which puts +0 first and
+// reproduces retail's order exactly. Byte-wise this is indistinguishable from a
+// vtable reference, because both are masked DIR32 relocations, so the store
+// encoding does not change -- only its position. The cost is one pin for the
+// global and a base layout where +0 belongs to the derived, not to a vptr.
+//
