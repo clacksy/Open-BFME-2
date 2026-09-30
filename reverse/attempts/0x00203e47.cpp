@@ -20,7 +20,31 @@
 // `mov [eax+8],edx`). This source lets MSVC fold both to immediates instead
 // (`and dword [eax+0xc],0` and `mov dword [eax+8],imm32`), which also removes
 // the esi save/restore pair and shifts every later offset by 3 and 7 bytes.
-// The zero is NOT a shape difference -- it is the same store either way.
+//
+// REFUTED this round, so the next seat does not respend them (each still emits
+// a 30B body that folds both constants):
+//   * /O2 and /Ox: the zero becomes the 7-byte `mov dword [eax+0xc],0` and the
+//     string stays an immediate, so the TU is not merely at the wrong level.
+//   * Source order f0,f8,fC and f8,fC,f0.
+//   * Locals (`unsigned z = 0; const char *e = "";`) then stores.
+//   * Storing through a local `Out *o = out;`.
+//   * fC typed as `void*` and set to null.
+//
+// BOUNDARY EVIDENCE gathered this round -- the other half of the deficit three
+// earlier seats stopped on:
+//   * The PRECEDING Ghidra inventory row is `0x00203E2C +27`, ending exactly at
+//     0x203E47, and it is a matched ledger row (?Rva00203E2CXfer, same size).
+//   * The claimed body ends exactly on the `ret 4` at 0x203E65, and the NEXT
+//     function starts immediately there with no padding (`mov ecx,[0xdfe78c] /
+//     call 0x1dcd1c / neg al / sbb eax,eax / inc eax / ret`), followed by a
+//     scalar deleting destructor at 0x203E76.
+//   * boundary_validator.check_end(0x203E47, 30) passes: no known function
+//     start and no int3 run inside the range.
+//   * No rowed body calls it directly (tools/callers_of.py). Absence there is
+//     not evidence -- that lane covers a fraction of .text -- but the point is
+//     that no xref proof exists either way. Both 0x203E65 and 0x203E76 are also
+//     absent from the inventory, so this is a run of uninventoried functions
+//     bracketed by known ones at both ends.
 //
 // What is already established, so the next seat does not redo it:
 //   * No relative calls at all, so no callee pin is needed.
