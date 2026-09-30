@@ -42553,3 +42553,4 @@ __dup_0084EBC0,,0x00021D50,224,Code/Libraries/Source/WWVegas/WWLib/stlport_Local
 ??0Rva00151632@@QAE@PBD@Z,,0x001515CA,98,Code/GameEngine/Source/Common/Rva00151632Ctor.cpp,matched,vtable 0x007D3A6C plus rowed dtor twin plus GenBase base plus fxShader format
 ??1Rva0034C5E0@@UAE@XZ,,0x0035822E,88,Code/GameEngine/Source/Common/Rva0034C5E0Dtor.cpp,matched,dtor null-checked tree dtor 0x00357C6A plus delete 0x0002FD60 then StringBase 0x00036410 vtable 0x008150E4 base 0x007BB554
 ?rva0053155E@Rva005312BE@@QAEXHH_NH@Z,,0x0053155E,82,Code/GameEngine/Source/Common/Rva005312BEClear.cpp,matched,chain from 0x00531132 bounded forward to set
+?dup_002833e7@@YIXPAURva002833E7Holder@@@Z,,0x002833E7,26,Code/GameEngine/Source/Common/Rva002833E7.cpp,matched,owned-pointer reset: member read then cleared before the guard; delete p lowers to the rowed ??3@YAXPAX@Z. Identity not recovered; packet lead was one of 55 equal ties and is not a list insert
